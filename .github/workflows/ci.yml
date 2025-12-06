@@ -33,7 +33,7 @@ jobs:
         pip install -r requirements.txt
 
     - name: pytest
-      run: pytest tests/ -v --tb=short --pythonpath=.
+      run: PYTHONPATH=. pytest tests/ -v --tb=short  # исправлено
 
   lint:
     runs-on: ubuntu-latest
