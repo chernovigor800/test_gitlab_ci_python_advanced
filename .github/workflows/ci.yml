@@ -1,4 +1,5 @@
 name: CI
+
 on:
   pull_request:
     branches: [main]
@@ -7,10 +8,10 @@ on:
 
 jobs:
   tests:
-    runs-on: ubuntu-latest  # 24.04 вместо 22.04
+    runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.12", "3.11"]  # современные LTS
+        python-version: ["3.12", "3.11"]
     
     steps:
       - name: Checkout
@@ -25,34 +26,42 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements*.txt') }}
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
       
       - name: Install dependencies
         run: |
           pip install --upgrade pip
-          pip install -r requirements-test.txt  # тесты только
+          pip install -r requirements.txt
+      
       - name: pytest
         run: pytest tests/ -v --tb=short
-      
-      # dev tools в отдельном job
+
   lint:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
       
       - name: Set up Python 3.12
         uses: actions/setup-python@v5
         with:
-          python-version: 3.12
+          python-version: "3.12"
       
       - name: Cache pip
         uses: actions/cache@v4
         with:
           path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-dev-${{ hashFiles('**/requirements-dev.txt') }}
+          key: ${{ runner.os }}-pip-dev-${{ hashFiles('requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-dev-
       
-      - name: Install dev dependencies
-        run: pip install -r requirements-dev.txt
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
       
       - name: black
         run: black --diff --check src/
